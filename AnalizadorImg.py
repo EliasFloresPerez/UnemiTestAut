@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import utlis as utlis
-from pyzbar.pyzbar import decode
 from PIL import Image
 import json
 
@@ -33,6 +32,7 @@ DataJson = {
     "Nota" : None
 }
 
+"""
 def analizar_qr(imagen):
     
     # Decodificar el código QR
@@ -44,7 +44,7 @@ def analizar_qr(imagen):
         return contenido_qr
     else:
         return None
-    
+"""
 
 class QuitarSombras():
     _instance = None
@@ -130,14 +130,7 @@ class AnalizadorImagenes():
         #Borrar
         #img = cv2.imread(img)
 
-        """
-        try:
-            Qr = analizar_qr(img)
-            Qr = json.loads(Qr)
-        except:
-            return {"Error":"No se ha podido leer el QR"}
-
-        """
+        
 
         
         newData["Informacion"]["#Preguntas"] = preguntas
