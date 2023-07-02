@@ -21,7 +21,7 @@ def codificar_json(obj):
 
 #Funcion que recibe una imagen y la analiza
 @app.post("/Analizar/")
-async def upload_image(image: UploadFile = File(...),texto: str =  Form(default=None)):
+async def upload_image(image: UploadFile = File(...),diccionario: str =  Form(default=None)):
     # Leer los datos de la imagen en memoria
     image_data = await image.read()
 
@@ -32,11 +32,13 @@ async def upload_image(image: UploadFile = File(...),texto: str =  Form(default=
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     
 
-    try:
-        arreglo = json.loads(texto)
-        datos = AnalizadorImagenes().Iniciar(img,arreglo)
-    except:
-        datos = AnalizadorImagenes().Iniciar(img)
+    
+    diccionario = json.loads(diccionario)
+    preguntas = int(diccionario["#Preguntas"])
+    eleccion  = int(diccionario["#Elecciones"])
+
+    datos = AnalizadorImagenes().Iniciar(img,preguntas,eleccion)
+    
 
 
     
