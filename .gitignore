@@ -1,0 +1,12 @@
+
+# Ignorar directorios de entornos virtuales
+venv/
+env/
+Entorno/
+
+#Que ignore lso pycache
+
+__pycache__/
+
+#Que ignore la carpeta Media
+Media/
