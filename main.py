@@ -20,8 +20,28 @@ def codificar_json(obj):
 
 
 #Funcion que recibe una imagen y la analiza
+
 @app.post("/Analizar/")
+
 async def upload_image(image: UploadFile = File(...),diccionario: str =  Form(default=None)):
+
+    """
+    **Función**: Manda a analizar la imagen
+
+    - **imagen**: Imagen a analizar.
+    - **diccionario**: Diccionario en Texto que contiene la cantidad de preguntas y elecciones de esta manera
+    
+    ```
+    {
+        "#Preguntas": "20",
+        "#Elecciones": "4"
+    }
+    ```
+
+    - Retorna un diccionario con las elecciones seleccionadas por el estudiante en un arreglo de tamaño N en un rango que comienza desde 0 hasta elecciones-1
+    - En caso de error Devuelve un diccionario con la clave "Error" y el valor del error
+    """
+
     # Leer los datos de la imagen en memoria
     image_data = await image.read()
 
@@ -32,16 +52,14 @@ async def upload_image(image: UploadFile = File(...),diccionario: str =  Form(de
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     
 
-    
-    diccionario = json.loads(diccionario)
-    preguntas = int(diccionario["#Preguntas"])
-    eleccion  = int(diccionario["#Elecciones"])
+    try:
+        diccionario = json.loads(diccionario)
+        preguntas = int(diccionario["#Preguntas"])
+        eleccion  = int(diccionario["#Elecciones"])
+    except:
+        return {"Error":"No se pudo cargar el diccionario"}
 
     datos = AnalizadorImagenes().Iniciar(img,preguntas,eleccion)
-    
-
-
-    
 
     #Quiero saber si datos que es un diccionario tiene una clave llamada error
     if "Error" in datos:
@@ -76,7 +94,26 @@ def GuardarImagenes(dict):
 
 #Segundo analizar para la aplicacion en angular
 @app.post("/Analizar2/")
+
 async def upload_image(image: UploadFile = File(...), diccionario: str =  Form(default=None)):
+
+    """
+    **Función**: Manda a analizar la imagen
+
+    - **imagen**: Imagen a analizar.
+    - **diccionario**: Diccionario en Texto que contiene la cantidad de preguntas y elecciones de esta manera
+
+    ```
+    {
+        "#Preguntas": "20",
+        "#Elecciones": "4"
+    }
+    ```
+    - Retorna un diccionario con las elecciones seleccionadas por el estudiante en un arreglo de tamaño N en un rango que comienza desde 0 hasta elecciones-,
+      Ademas d guardar las imagenes en la carpeta Archivos /Archivos/Imagen_N.jpg donde N es el numero de imagenes que van desde  0 a 10 
+    - En caso de error Devuelve un diccionario con la clave "Error" y el valor del error
+
+    """
     # Leer los datos de la imagen en memoria
     image_data = await image.read()
 
@@ -117,8 +154,35 @@ app.mount("/Archivos", StaticFiles(directory="Archivos"), name="Archivos")
 @app.post("/Moodle/Ingresar")
 def Obtener_Datos_Moodle(user: str =  Form(...), password: str =  Form(...)):
 
+
+    """
+        Función: Obtener los datos de un profesor al ingresar al aplicativo
+
+        - **user**: Usuario del profesor
+        - **password**: Contraseña del profesor
+        - Retorna un diccionario con su token y sus materias con este formato
+        ```
+        {
+            "Token": "Token del profesor",
+            "Nombre de la Materia": {
+                "id": "id de la materia",
+                "assignments": {
+                    "Nombre de la tarea": "id de la tarea"
+                }
+            },
+            ...
+        }
+        ```
+        - En caso de error Devuelve un diccionario con la clave "Error" y el valor del error
+
+
+    """
     #link = "https://vaquitamoodle.raulgarcia.dev/"
-    token = login(user, password, link)
+    try:
+        token = login(user, password, link)
+    except:
+        return {"Error":"Contraseña o usuario incorrecto"}
+    
     userid = getUserId(token,user, link)
 
 
@@ -147,6 +211,25 @@ def Obtener_Datos_Moodle(user: str =  Form(...), password: str =  Form(...)):
 #Permite enviar las notas de los estudiante al moodle
 @app.post("/Moodle/setNotas")
 def Enviar_Notas(token: str =  Form(...),data : str =  Form(...)):
+    """
+        **Función**: Enviar las notas de los estudiantes al moodle
+
+        - **token**: Token del profesor
+        - **data**: Lista de diccionarios en Texto que contiene las notas de los estudiantes de esta manera
+
+        ```
+        [
+            {
+                "assignmentid": "id de la tarea",
+                "userid": "id del estudiante",
+                "nota": "nota del estudiante"
+            }, 
+            ...
+        ]
+        ```
+        - Retorna un diccionario con la clave "Estado" y el valor "OK 200"
+        - En caso de error Devuelve un diccionario con la clave "Error" y el valor del error (Aun no implementado)
+    """
     data = json.loads(data)
 
     for i in data:
@@ -169,7 +252,35 @@ def Obtener_HojasPDF(token : str =  Form(...) ,
                     eleccion : str =  Form(...) ,
                     correo : str =  Form(...) ):
     
-    estudiantes = getEstudiantes(token, int(course_id), link)
+    """
+        **Función**: Obtener las hojas de PDF para los estudiantes de una materia y lo envia al correo del profesor
+
+        - **token**: Token del profesor
+        - **id_examen**: id de la tarea
+        - **course_id**: id de la materia
+        - **tutor**: Nombre del profesor
+        - **NombreMateria**: Nombre de la materia
+        - **preguntas**: Cantidad de preguntas
+        - **eleccion**: Cantidad de elecciones
+        - **correo**: Correo del profesor
+        
+        - Retorna un diccionario con la clave "Estado" y el valor "ok"
+        - En caso de error Devuelve un diccionario con la clave "Error" y el valor del error
+    """
+
+    try:
+        int(id_examen)
+        int(course_id)
+        int(preguntas)
+        int(eleccion)
+    except:
+        return {"Error":"id_examen, course_id, preguntas o eleccion no es un numero"}
+
+    try:
+        estudiantes = getEstudiantes(token, int(course_id), link)
+    except:
+        return {"Error":"Token Error o Course_id Error"}
+    
     diccionario = []
 
     for i in estudiantes:
@@ -197,7 +308,5 @@ def Obtener_HojasPDF(token : str =  Form(...) ,
 
     enviar_correo(correo)
     
-
-    # Devolver el archivo PDF como respuesta
-    return {"ok":"ok"}
+    return {"Estado":"ok"}
 
