@@ -109,6 +109,7 @@ class CrearPdf():
         DataQr = {
             "userid": datos["userid"],
             "tareaid": datos["tareaid"],
+            "Nombre :": datos["nombre"],
             "#Preguntas": datos["#Preguntas"],
             "#Elecciones": datos["#Elecciones"],
         }
