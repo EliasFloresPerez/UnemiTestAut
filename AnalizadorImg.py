@@ -148,7 +148,8 @@ class AnalizadorImagenes():
             self.Convertir_imagenes(newData)
             self.Contornos(newData)
 
-        except:
+        except :
+            
             #Proceso para testing
             newData  = {
                 "Error":"No se pudo analizar la imagen",
@@ -395,5 +396,6 @@ class AnalizadorImagenes():
 #a = AnalizadorImagenes().Iniciar("Prueba.png",[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
 #print(AnalizadorImagenes().Retornar_Datos(a))
 
-#AnalizadorImagenes().Iniciar("PruebaQR.png",20,4)
+
+
 
