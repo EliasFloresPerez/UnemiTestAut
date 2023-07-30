@@ -127,9 +127,17 @@ async def upload_image(image: UploadFile = File(...), diccionario: str =  Form(d
     #arreglo   = diccionario["Respuesta"]
     preguntas = int(diccionario["#Preguntas"])
     eleccion  = int(diccionario["#Elecciones"])
-
+    respuesta  = diccionario["Respuestas"]
     
-    datos = AnalizadorImagenes().Iniciar(img,preguntas,eleccion)
+    #Respuestas es esto y lo quiero a arreglo : 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+    try:
+        if respuesta != "":
+            respuesta = respuesta.split(",")
+
+    except:
+        respuesta = None
+
+    datos = AnalizadorImagenes().Iniciar(img,preguntas,eleccion,respuestas=respuesta)
     
     #Quiero saber si datos que es un diccionario tiene una clave llamada error
     if "Error" in datos:
