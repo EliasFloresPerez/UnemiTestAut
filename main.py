@@ -149,6 +149,9 @@ async def upload_image(image: UploadFile = File(...), diccionario: str =  Form(d
             respuesta = respuesta.split(",")
             respuesta = [int(i) for i in respuesta]
 
+        #Verificar que la cantidad de respuestas sea igual a la cantidad de preguntas para poder marcarla bien
+        if respuesta == "" or len(respuesta) != preguntas :
+            respuesta = None
     except:
         respuesta = None
     
