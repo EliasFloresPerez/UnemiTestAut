@@ -5,6 +5,7 @@ import cv2
 import json
 from AnalizadorImg import * 
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 from MoodleConector import *
 from PDF.CreadorPDF import *
@@ -12,6 +13,17 @@ from Correos import *
 
 import os
 app = FastAPI()
+
+
+# Configuración de CORS para permitir todas las solicitudes desde cualquier origen
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 def codificar_json(obj):
     if isinstance(obj, np.int64):
@@ -106,7 +118,8 @@ async def upload_image(image: UploadFile = File(...), diccionario: str =  Form(d
     ```
     {
         "#Preguntas": "20",
-        "#Elecciones": "4"
+        "#Elecciones": "4",
+        "Respuestas": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
     }
     ```
     - Retorna un diccionario con las elecciones seleccionadas por el estudiante en un arreglo de tamaño N en un rango que comienza desde 0 hasta elecciones-,
@@ -127,9 +140,23 @@ async def upload_image(image: UploadFile = File(...), diccionario: str =  Form(d
     #arreglo   = diccionario["Respuesta"]
     preguntas = int(diccionario["#Preguntas"])
     eleccion  = int(diccionario["#Elecciones"])
-
     
-    datos = AnalizadorImagenes().Iniciar(img,preguntas,eleccion)
+    
+    
+    try:
+        respuesta  = diccionario["Respuestas"]
+        if respuesta != "":
+            respuesta = respuesta.split(",")
+            respuesta = [int(i) for i in respuesta]
+
+        #Verificar que la cantidad de respuestas sea igual a la cantidad de preguntas para poder marcarla bien
+        if respuesta == "" or len(respuesta) != preguntas :
+            respuesta = None
+    except:
+        respuesta = None
+    
+    
+    datos = AnalizadorImagenes().Iniciar(img,preguntas,eleccion,respuestas=respuesta)
     
     #Quiero saber si datos que es un diccionario tiene una clave llamada error
     if "Error" in datos:
